@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D ID Card - Layer-by-Layer Build</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #0c0a1a;
+    }
+
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    #info {
+      position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-family: sans-serif;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+    }
+  </style>
+  <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js",
+                "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div id="info">Drag to rotate the card</div>
+
+  <script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+
+let scene, camera, renderer, controls, cardGroup, cardBackGroup;
+const fadeableMeshes = [];
+const backFadeableMeshes = [];
+const cardNormal = new THREE.Vector3(0, 0, 1);
+
+let targetYRotation = 0;
+let isFlippedByClick = false;
+let lastOrbitAzimuthal = 0;
+
+// --- Tap/click/drag state
+let pointerIsDown = false;
+let pointerMoved = false;
+let downPos = { x: 0, y: 0 };
+const DRAG_THRESHOLD = 8; // px
+
+function getPointerPos(e) {
+  if (e.touches && e.touches.length > 0) {
+    return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }
+  return { x: e.clientX, y: e.clientY };
+}
+
+function createProfileCircleTexture(imageUrl, size = 256) {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(size / 2, size / 2, size / 2 - 4, 0, 2 * Math.PI);
+  ctx.closePath();
+  ctx.clip();
+  const img = new window.Image();
+  img.src = imageUrl;
+  return new Promise(resolve => {
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, size, size);
+      ctx.restore();
+      const tex = new THREE.CanvasTexture(canvas);
+      resolve(tex);
+    };
+    img.onerror = () => {
+      ctx.fillStyle = '#555';
+      ctx.fillRect(0, 0, size, size);
+      ctx.restore();
+      resolve(new THREE.CanvasTexture(canvas));
+    };
+  });
+}
+
+function init() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 0, 11);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  document.body.appendChild(renderer.domElement);
+
+  // --- Lighting ---
+  const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
+  scene.add(ambientLight);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 2.2);
+  directionalLight.position.set(5, 10, 8);
+  directionalLight.castShadow = true;
+  scene.add(directionalLight);
+
+  // --- Controls ---
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableZoom = false;
+  controls.autoRotate = false;
+  controls.minPolarAngle = Math.PI / 4;
+  controls.maxPolarAngle = 3 * Math.PI / 4;
+  lastOrbitAzimuthal = controls.getAzimuthalAngle();
+
+  // --- Card Dimensions ---
+  const cardWidth = 3.5;
+  const cardHeight = 5.0;
+  const borderGeometry = new THREE.EdgesGeometry(new THREE.PlaneGeometry(cardWidth, cardHeight));
+  const borderMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2, transparent: true });
+
+  // --- FRONT GROUP ---
+  cardGroup = new THREE.Group();
+  scene.add(cardGroup);
+
+  // Card Border
+  const border = new THREE.LineSegments(borderGeometry, borderMaterial);
+  border.position.set(0, 0, 0.01);
+  cardGroup.add(border);
+  fadeableMeshes.push(border);
+
+  // LAYER POSITIONS
+  const yTitle = 2.1;
+  const ySubtitle = 1.7;
+  const yTagline = 1.3;
+  const yName = 0.6;
+  const yGroup = 0.3;
+  const yAvatar = -2.2;
+  const yDate = -2.2;
+
+  // --- Font Loader & Front Design ---
+  const fontLoader = new FontLoader();
+  fontLoader.load('https://threejs.org/examples/fonts/helvetiker_bold.typeface.json', (font) => {
+    const titleMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, metalness: 0.85, transparent: true });
+
+    // Main Title
+    const titleGeo = new TextGeometry('Hariprabodham', { font, size: 0.28, height: 0.08, curveSegments: 12 });
+    titleGeo.center();
+    const titleMesh = new THREE.Mesh(titleGeo, titleMat);
+    titleMesh.position.set(0, yTitle, 0.1);
+    cardGroup.add(titleMesh);
+    fadeableMeshes.push(titleMesh);
+
+    // Subtitle
+    const subtitleGeo = new TextGeometry('Youth Shibir', { font, size: 0.23, height: 0.06, curveSegments: 12 });
+    subtitleGeo.center();
+    const subtitleMesh = new THREE.Mesh(subtitleGeo, titleMat.clone());
+    subtitleMesh.position.set(0, ySubtitle, 0.1);
+    cardGroup.add(subtitleMesh);
+    fadeableMeshes.push(subtitleMesh);
+
+    // Tagline
+    const taglineGeo = new TextGeometry('"A Journey Within"', { font, size: 0.13, height: 0.03, curveSegments: 12 });
+    taglineGeo.center();
+    const taglineMesh = new THREE.Mesh(taglineGeo, titleMat.clone());
+    taglineMesh.position.set(0, yTagline, 0.1);
+    cardGroup.add(taglineMesh);
+    fadeableMeshes.push(taglineMesh);
+
+    // Name
+    const nameGeo = new TextGeometry('Dharmik Mistry', { font, size: 0.16, height: 0.05, curveSegments: 12 });
+    const nameMesh = new THREE.Mesh(nameGeo, titleMat.clone());
+    nameGeo.computeBoundingBox();
+    nameMesh.position.set(-0.28, yName, 0.2);
+    cardGroup.add(nameMesh);
+    fadeableMeshes.push(nameMesh);
+
+    // Group
+    const groupMat = new THREE.MeshStandardMaterial({ color: 0xf0c43f, roughness: 0.4, metalness: 0.7, transparent: true });
+    const groupGeo = new TextGeometry('Pulkit', { font, size: 0.13, height: 0.04, curveSegments: 12 });
+    const groupMesh = new THREE.Mesh(groupGeo, groupMat);
+    groupGeo.computeBoundingBox();
+    groupMesh.position.set(-0.28, yGroup, 0.2);
+    cardGroup.add(groupMesh);
+    fadeableMeshes.push(groupMesh);
+
+    // Date
+    const dateGeo = new TextGeometry('1 - 3 AUGUST 2025', { font, size: 0.14, height: 0.04, curveSegments: 12 });
+    dateGeo.computeBoundingBox();
+    const dateWidth = dateGeo.boundingBox.max.x - dateGeo.boundingBox.min.x;
+    const dateMesh = new THREE.Mesh(dateGeo, titleMat.clone());
+    dateMesh.position.set(cardWidth / 4 - dateWidth / 2 - 0.12, yDate, -0.2);
+    cardGroup.add(dateMesh);
+    fadeableMeshes.push(dateMesh);
+
+    // 3D Avatar
+    const loader = new GLTFLoader();
+    loader.load('https://threejs.org/examples/models/gltf/RobotExpressive/RobotExpressive.glb', (gltf) => {
+      const avatar = gltf.scene;
+      avatar.scale.set(0.42, 0.42, 0.42);
+      avatar.position.set(-1.0, yAvatar, 0);
+      avatar.rotation.y = 0.0;
+      avatar.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          child.material.transparent = true;
+          fadeableMeshes.push(child);
+        }
+      });
+      cardGroup.add(avatar);
+    });
+  });
+
+  // Profile Picture
+  createProfileCircleTexture('profile.png', 192).then(profileTexture => {
+    const profileMat = new THREE.MeshBasicMaterial({ map: profileTexture });
+    profileMat.transparent = true;
+    const profileCircle = new THREE.Mesh(new THREE.CircleGeometry(0.4, 48), profileMat);
+    profileCircle.position.set(-0.9, 0.6, 0.3);
+    cardGroup.add(profileCircle);
+    fadeableMeshes.push(profileCircle);
+  });
+
+  // --- BACK OF CARD GROUP ---
+  cardBackGroup = new THREE.Group();
+  cardBackGroup.rotation.y = Math.PI;
+  scene.add(cardBackGroup);
+
+  // Card Back Border
+  const backBorder = new THREE.LineSegments(borderGeometry.clone(), borderMaterial.clone());
+  backBorder.position.set(0, 0, 0.01);
+  cardBackGroup.add(backBorder);
+  backFadeableMeshes.push(backBorder);
+
+  // Card Back (background)
+  const backBgMat = new THREE.MeshBasicMaterial({ color: 0x232445 });
+  const backPlane = new THREE.Mesh(new THREE.PlaneGeometry(cardWidth, cardHeight), backBgMat);
+  backPlane.position.set(0, 0, 0);
+  cardBackGroup.add(backPlane);
+
+  // QR CODE on back (adjust image as needed)
+  const texLoader = new THREE.TextureLoader();
+  texLoader.load('qr.png', function(texture) {
+    const qrMat = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+    const qrMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 1.4), qrMat);
+    qrMesh.position.set(0, 0.2, 0.12);
+    cardBackGroup.add(qrMesh);
+    backFadeableMeshes.push(qrMesh);
+  });
+
+  initBackgroundAnimation();
+  window.addEventListener('resize', onWindowResize);
+  animate();
+}
+
+// --- Pointer/Touch handlers (robust for both) ---
+function isTap(x1, y1, x2, y2) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  return Math.sqrt(dx * dx + dy * dy) < DRAG_THRESHOLD;
+}
+
+function attachPointerAndTouchListeners() {
+  // For both mouse and touch
+  renderer.domElement.addEventListener('pointerdown', e => {
+    pointerIsDown = true;
+    pointerMoved = false;
+    downPos = getPointerPos(e);
+  });
+  renderer.domElement.addEventListener('pointermove', e => {
+    if (!pointerIsDown) return;
+    const pos = getPointerPos(e);
+    const dx = pos.x - downPos.x;
+    const dy = pos.y - downPos.y;
+    if (Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD) {
+      pointerMoved = true;
+    }
+  });
+  renderer.domElement.addEventListener('pointerup', e => {
+    if (!pointerIsDown) return;
+    pointerIsDown = false;
+    if (!pointerMoved) {
+      isFlippedByClick = !isFlippedByClick;
+      targetYRotation = isFlippedByClick ? Math.PI : 0;
+    }
+  });
+
+  // Touch fallback (for extra support)
+  renderer.domElement.addEventListener('touchstart', e => {
+    pointerIsDown = true;
+    pointerMoved = false;
+    downPos = getPointerPos(e);
+  });
+  renderer.domElement.addEventListener('touchmove', e => {
+    if (!pointerIsDown) return;
+    const pos = getPointerPos(e);
+    const dx = pos.x - downPos.x;
+    const dy = pos.y - downPos.y;
+    if (Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD) {
+      pointerMoved = true;
+    }
+  });
+  renderer.domElement.addEventListener('touchend', e => {
+    if (!pointerIsDown) return;
+    pointerIsDown = false;
+    if (!pointerMoved) {
+      isFlippedByClick = !isFlippedByClick;
+      targetYRotation = isFlippedByClick ? Math.PI : 0;
+    }
+  });
+}
+
+function checkDragFlip() {
+  // Snap to front/back if user orbits past halfway
+  let azimuthal = controls.getAzimuthalAngle();
+  let diff = Math.abs(azimuthal - lastOrbitAzimuthal);
+  if (diff > 0.03) {
+    targetYRotation = azimuthal > 0 ? 0 : Math.PI;
+    isFlippedByClick = (targetYRotation === Math.PI);
+    lastOrbitAzimuthal = azimuthal;
+  }
+}
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  checkDragFlip();
+
+  // Animate card flip (smooth interpolation)
+  cardGroup.rotation.y += (targetYRotation - cardGroup.rotation.y) * 0.15;
+  cardBackGroup.rotation.y = cardGroup.rotation.y + Math.PI;
+
+  // Determine which side faces camera
+  let camPos = new THREE.Vector3();
+  camera.getWorldPosition(camPos);
+  let cardPos = new THREE.Vector3();
+  cardGroup.getWorldPosition(cardPos);
+  let toCam = camPos.clone().sub(cardPos).normalize();
+  let matrix = new THREE.Matrix4();
+  matrix.extractRotation(cardGroup.matrixWorld);
+  let normal = cardNormal.clone().applyMatrix4(matrix);
+  let dot = normal.dot(toCam);
+
+  // Show front if camera is in front; back if camera is behind
+  cardGroup.visible = (dot > 0);
+  cardBackGroup.visible = (dot <= 0);
+
+  // Edge fade for FRONT
+  let opacity = THREE.MathUtils.smoothstep(Math.abs(dot), 0.13, 0.5);
+  fadeableMeshes.forEach(mesh => {
+    if (mesh.isGroup || mesh.isScene) {
+      mesh.traverse(child => {
+        if (child.isMesh && child.material) {
+          child.material.opacity = opacity;
+          child.material.depthWrite = opacity > 0.1;
+        }
+      });
+    } else if (mesh.material) {
+      mesh.material.opacity = opacity;
+      mesh.material.depthWrite = opacity > 0.1;
+    }
+  });
+
+  // Edge fade for BACK
+  let dotBack = -dot;
+  let opacityBack = THREE.MathUtils.smoothstep(Math.abs(dotBack), 0.13, 0.5);
+  backFadeableMeshes.forEach(mesh => {
+    if (mesh.isGroup || mesh.isScene) {
+      mesh.traverse(child => {
+        if (child.isMesh && child.material) {
+          child.material.opacity = opacityBack;
+          child.material.depthWrite = opacityBack > 0.1;
+        }
+      });
+    } else if (mesh.material) {
+      mesh.material.opacity = opacityBack;
+      mesh.material.depthWrite = opacityBack > 0.1;
+    }
+  });
+
+  renderer.render(scene, camera);
+}
+
+function initBackgroundAnimation() {
+  const bgScene = new THREE.Scene();
+  const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  bgCamera.position.z = 5;
+  const bgRenderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), antialias: true });
+  bgRenderer.setSize(window.innerWidth, window.innerHeight);
+
+  const starGeo = new THREE.BufferGeometry();
+  const starCount = 5000;
+  const posArray = new Float32Array(starCount * 3);
+  for (let i = 0; i < starCount * 3; i++) {
+    posArray[i] = (Math.random() - 0.5) * 20;
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+  const starMat = new THREE.PointsMaterial({ color: 0x8888aa, size: 0.015 });
+  const stars = new THREE.Points(starGeo, starMat);
+  bgScene.add(stars);
+
+  function animateBg() {
+    stars.rotation.y += 0.0001;
+    stars.rotation.x += 0.0001;
+    bgRenderer.render(bgScene, bgCamera);
+    requestAnimationFrame(animateBg);
+  }
+  animateBg();
+
+  window.addEventListener('resize', () => {
+    bgCamera.aspect = window.innerWidth / window.innerHeight;
+    bgCamera.updateProjectionMatrix();
+    bgRenderer.setSize(window.innerWidth, window.innerHeight);
+  });
+}
+
+init();
+attachPointerAndTouchListeners();
+</script>
+
+
+
+</body>
+</html>
