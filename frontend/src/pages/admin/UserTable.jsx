@@ -27,8 +27,8 @@ const UserTable = ({ users }) => {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
-            <tr key={user._id}>
+          {users.map((user,idx) => (
+            <tr key={idx}>
               <td>
                 {user.photo ? (
                   <img

@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(cuid())
+  first_name     String
+  last_name      String
+  dob            DateTime
+  email          String   @unique
+  phone          String
+  address        String
+  reference      String
+  group          String
+  eduType        String? // 'school' or 'college'
+  standard       String? // 8–12 (only for school)
+  stream         String? // Science, Commerce, Arts (only for 11–12)
+  schoolName     String? // if eduType = 'school'
+  collegeName    String? // if eduType = 'college'
+  branch         String? // if eduType = 'college'
+  semester       String? // 1–8 (if college)
+  photo          String?
+  qr             String
+  payment_status Boolean  @default(false)
+  hostel         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+}
+
+model Attendance {
+  id        String   @id @default(cuid()) // or use Int @id @default(autoincrement())
+  email     String
+  day       String
+  session   String
+  timestamp DateTime @default(now())
+}

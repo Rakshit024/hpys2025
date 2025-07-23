@@ -6,6 +6,7 @@ const userRoutes = require("./routes/userRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 
+
 require("dotenv").config();
 
 const app = express();
@@ -30,9 +31,6 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'view/dist/index.html'));
 });
 
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
+
 
 app.listen(5000, "0.0.0.0", () => console.log("Server running on port http://localhost:5000"));

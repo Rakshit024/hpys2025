@@ -16,7 +16,7 @@ const AdminUsers = () => {
     const fetchAllUsers = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/admin/users`);
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/users`);
         const data = await response.json();
         if (data.success) {
           setAllUsers(data.data);

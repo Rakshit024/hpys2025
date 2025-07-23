@@ -9,7 +9,7 @@ const AttendanceHome = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!day || !session) return alert("Select both fields");
+    if (!day || !session) {return alert("Select both fields")};
     navigate(`/scan?day=${day}&session=${session}`);
   };
 

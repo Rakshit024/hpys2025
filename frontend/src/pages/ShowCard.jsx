@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/showcard.css";
+import toast from "react-hot-toast";
 
 const ShowCard = () => {
   const [email, setEmail] = useState("");
@@ -9,7 +10,7 @@ const ShowCard = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!email) return alert("Please enter a registered email");
+    if (!email) {return toast.error("Please enter a registered email")};
     navigate(`/card?email=${encodeURIComponent(email)}`);
   };
 
@@ -20,13 +21,14 @@ const ShowCard = () => {
         <div className="form-group">
           <input
             type="email"
-            placeholder=" "
+            className="input"
+            placeholder="Enter the email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
           />
-          <label>Enter your registered email</label>
+        
         </div>
         <button type="submit">Show Card</button>
         <button type="button" onClick={() => navigate("/")}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import BarcodeScannerComponent from "react-qr-barcode-scanner";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -32,13 +32,13 @@ const ScanQR = () => {
           Attendance for <strong>{day}</strong> - <strong>{session}</strong>
         </h2>
 
-        <div id="qr-reader">
+        <div id="qr-reader" className="qr-reader-wrapper">
           <BarcodeScannerComponent
             width="100%"
             height="100%"
             onUpdate={async (err, result) => {
               if (result && !hasScanned) {
-                setHasScanned(true); // ✅ Lock scanner after first scan
+                setHasScanned(true);
                 setIsLoading(true);
                 try {
                   const res = await axios.post(
@@ -56,7 +56,7 @@ const ScanQR = () => {
                 } catch (error) {
                   if (error.response?.status === 409) {
                     toast.error("Attendance Already Marked");
-                    setData({})
+                    setData({});
                   } else {
                     toast.error("Failed to mark attendance");
                   }
@@ -66,27 +66,26 @@ const ScanQR = () => {
               }
             }}
           />
+
+          {/* Scanner Overlay */}
+          <div className="scanner-overlay">
+            <div className="scanner-box" />
+          </div>
+
+          {/* Spinner */}
+          {isLoading && (
+            <div className="scanner-spinner">
+              <div className="spinner"></div>
+              <p>Processing...</p>
+            </div>
+          )}
         </div>
+
         {hasScanned && (
           <button onClick={() => setHasScanned(false)}>Scan Again</button>
         )}
 
         <button onClick={() => navigate("/attendance")}>Home</button>
-      </div>
-      <div className="flex items-center justify-center">
-        {data.photo_url && (
-          <img
-            src={`${import.meta.env.VITE_BACKEND_URL}/uploads/${
-              data.photo_url
-            }`}
-            alt="User Image"
-            height={100}
-            width={100}
-          
-            className="object-contain w-sm"
-           
-          />
-          )}
       </div>
     </>
   );

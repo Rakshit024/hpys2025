@@ -2,7 +2,8 @@
 .admin-container {
   min-height: 100vh;
   padding: var(--space-6);
-  background: linear-gradient(135deg, var(--neutral-50) 0%, var(--primary-50) 100%);
+  background: var(--bg-main);
+  color: var(--text-main);
   position: relative;
   overflow-x: hidden;
 }
@@ -16,9 +17,9 @@
   right: 0;
   bottom: 0;
   background-image: 
-    radial-gradient(circle at 20% 80%, var(--primary-100) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, var(--primary-200) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, var(--neutral-100) 0%, transparent 50%);
+    radial-gradient(circle at 20% 80%, var(--main-orange) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, var(--main-blue) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, var(--main-purple) 0%, transparent 50%);
   opacity: 0.6;
   z-index: -1;
 }
@@ -48,15 +49,15 @@
 }
 
 .admin-header h1 {
-  color: var(--neutral-900);
+  color: var(--main-orange);
   margin: 0 0 var(--space-6) 0;
   font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 700;
   text-align: center;
-  background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
 }
 
 .admin-nav {
@@ -67,16 +68,16 @@
 }
 
 .nav-btn {
-  background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
-  color: white;
+  background: var(--main-blue);
+  color: var(--text-invert);
   border: none;
   padding: var(--space-4) var(--space-6);
   border-radius: var(--radius-xl);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-lg);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(17,133,178,0.15);
   position: relative;
   overflow: hidden;
   min-width: 200px;
@@ -97,16 +98,21 @@
   left: 100%;
 }
 
-.nav-btn:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-2xl);
-  background: linear-gradient(135deg, var(--primary-700), var(--primary-800));
+.nav-btn:focus-visible {
+  outline: 3px solid var(--main-yellow);
+  outline-offset: 2px;
+}
+
+.nav-btn:hover, .nav-btn:focus {
+  background: var(--main-orange);
+  color: var(--text-invert);
+  box-shadow: 0 6px 24px rgba(17,133,178,0.25);
 }
 
 .nav-btn.active {
-  background: linear-gradient(135deg, var(--primary-800), var(--primary-900));
-  transform: scale(1.05);
-  box-shadow: var(--shadow-2xl);
+  background: var(--main-purple);
+  color: var(--text-invert);
+  box-shadow: 0 8px 32px rgba(174,131,177,0.25);
 }
 
 .admin-content {
@@ -139,7 +145,7 @@
   left: 0;
   width: 60px;
   height: 3px;
-  background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+  background: linear-gradient(135deg, var(--warning-500), var(--primary-600));
   border-radius: var(--radius-md);
 }
 

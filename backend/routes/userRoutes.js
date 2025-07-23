@@ -1,6 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
+const prisma = require('../models/prisma');
 const {
   registerUser,
   getUserByEmail,
@@ -20,12 +21,18 @@ router.get("/getUserByEmail", async (req, res) => {
   const rawEmail = req.query.email;
   const email = decodeURIComponent(rawEmail || "").toLowerCase();
 
-  if (!email) return res.status(400).send("Email required");
+  if (!email){ return res.status(400).send("Email required");}
 
   try {
     console.log("Looking for email:", email);
-    const user = await User.findOne({
-      email: { $regex: new RegExp(`^${email}$`, "i") },
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: email,
+          mode: 'insensitive' // case-insensitive match
+        }
+      }
     });
 
     if (!user) {
@@ -40,7 +47,6 @@ router.get("/getUserByEmail", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
 router.get("/getAllUsers", async (req, res) => {
   const count = await User.countDocuments();
   res.json({ count });

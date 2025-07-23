@@ -1,23 +1,25 @@
 /* ShowCard Page Styles - Futuristic, Mobile-First */
 :root {
-  --primary: #6a11cb;
-  --secondary: #2575fc;
-  --accent: #ffb347;
-  --background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-  --card-bg: rgba(255,255,255,0.18);
+  --primary: var(--main-orange);
+  --secondary: var(--main-blue);
+  --accent: var(--main-yellow);
+  --purple: var(--main-purple);
+  --background: var(--bg-main);
+  --card-bg: var(--powder-blue);
   --card-blur: blur(10px);
-  --text-main: #fff;
+  --text-main: #222;
   --text-dark: #222;
-  --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  --shadow: 0 8px 32px 0 rgba(225, 108, 81, 0.37);
   --radius: 1.5rem;
   --transition: 0.3s cubic-bezier(.4,2,.6,1);
 }
 
 .showcard-container {
-  max-width: 400px;
+  max-width: 300px;
   margin: 0 auto;
   padding: 2rem 1rem 1.5rem 1rem;
   background: var(--card-bg);
+  color: var(--text-main);
   box-shadow: var(--shadow);
   border-radius: var(--radius);
   backdrop-filter: var(--card-blur);
@@ -31,9 +33,11 @@
   font-size: 1.7rem;
   font-weight: 700;
   margin-bottom: 1.2rem;
-  background: linear-gradient(90deg, #FFD700, #FFB347);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--main-orange);
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
 }
 
 .showcard-form {
@@ -48,7 +52,7 @@
   width: 100%;
 }
 
-.form-group input {
+/* .form-group input {
   width: 100%;
   padding: 1.1rem 1rem 0.5rem 1rem;
   border: none;
@@ -60,12 +64,9 @@
   box-shadow: 0 2px 8px rgba(106,17,203,0.08);
   outline: none;
   transition: box-shadow var(--transition), background var(--transition);
-}
+} */
 
-.form-group input:focus {
-  background: rgba(255,255,255,0.32);
-  box-shadow: 0 4px 24px rgba(37,117,252,0.18);
-}
+
 
 .form-group label {
   position: absolute;
@@ -84,27 +85,31 @@
   left: 1rem;
   font-size: 0.85rem;
   color: var(--primary);
-  background: transparent;
+  background: var(--secondary);
+  border-radius: 2rem;
+  padding: 0.9rem 2.2rem;
 }
 
 .showcard-form button {
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background: var(--primary);
   color: #fff;
   border: none;
-  border-radius: 2rem;
-  padding: 0.9rem 2.2rem;
+  border-radius: 2.5rem;
+  padding: 1rem 0;
   font-size: 1.1rem;
-  font-weight: 600;
-  box-shadow: 0 2px 12px rgba(106,17,203,0.15);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(17,133,178,0.15);
   cursor: pointer;
-  transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
   outline: none;
   margin-top: 0.5rem;
+  width: 100%;
 }
 .showcard-form button:hover, .showcard-form button:focus {
-  transform: translateY(-2px) scale(1.04);
-  background: linear-gradient(90deg, var(--accent), var(--primary));
-  box-shadow: 0 4px 24px rgba(37,117,252,0.18);
+  background: var(--secondary);
+  color: #fff;
+  box-shadow: 0 6px 24px rgba(17,133,178,0.25);
+  transform: scale(1.04);
 }
 
 @media (max-width: 600px) {
@@ -112,12 +117,23 @@
     margin-top: 1.2rem;
     padding: 1.2rem 0.5rem 1rem 0.5rem;
     max-width: 98vw;
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
   .showcard-container h2 {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
   }
   .showcard-form button {
-    padding: 0.7rem 1.2rem;
+    padding: 1rem 0;
+    font-size: 1.1rem;
+    width: 100%;
+    border-radius: 2.5rem;
+  }
+  .form-group input {
     font-size: 1rem;
+    padding: 1rem 0.8rem 0.5rem 0.8rem;
+  }
+  .showcard-form {
+    gap: 0.7rem;
   }
 } 

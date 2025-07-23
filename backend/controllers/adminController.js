@@ -1,26 +1,47 @@
 const User = require("../models/User");
 const Attendance = require("../models/Attendance");
+const prisma = require("../models/prisma")
 
 // Get all users with search functionality
 const getAllUsers = async (req, res) => {
   try {
     const { search } = req.query;
-    
-    let query = {};
-    
-    // Search by name, last name, middle name, or address
+
+    let where = {};
+
+    // Search by first_name, last_name, or address (case-insensitive)
     if (search) {
-      query = {
-        $or: [
-          { first_name: { $regex: search, $options: 'i' } },
-          { last_name: { $regex: search, $options: 'i' } },
-          { address: { $regex: search, $options: 'i' } }
+      where = {
+        OR: [
+          { first_name: { contains: search, mode: 'insensitive' } },
+          { last_name: { contains: search, mode: 'insensitive' } },
+          { address: { contains: search, mode: 'insensitive' } }
         ]
       };
     }
-    
-    const users = await User.find(query).select('-qr').sort({ createdAt: -1 });
-    
+
+    // Fetch users, exclude 'qr', sort by createdAt descending
+    const users = await prisma.user.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        first_name: true,
+        last_name: true,
+        dob: true,
+        email: true,
+        phone: true,
+        occupation: true,
+        qualification: true,
+        address: true,
+        photo: true,
+        reference: true,
+        group: true,
+        createdAt: true
+        // Exclude qr
+      }
+    });
+
     res.json({
       success: true,
       data: users,
@@ -40,65 +61,94 @@ const getAllUsers = async (req, res) => {
 const getAttendanceRecords = async (req, res) => {
   try {
     const { search, day, session, sortBy } = req.query;
-    
-    let query = {};
-    
-    // Search by user details
+
+    let emailFilter = undefined;
+
+    // 1. Handle user search by name/email/address
     if (search) {
-      const users = await User.find({
-        $or: [
-          { first_name: { $regex: search, $options: 'i' } },
-          { last_name: { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } },
-          { address: { $regex: search, $options: 'i' } }
-        ]
-      }).select('email');
-      
-      const userEmails = users.map(user => user.email);
-      query.email = { $in: userEmails };
+      const matchedUsers = await prisma.user.findMany({
+        where: {
+          OR: [
+            { first_name: { contains: search, mode: 'insensitive' } },
+            { last_name: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } },
+            { address: { contains: search, mode: 'insensitive' } },
+          ]
+        },
+        select: { email: true }
+      });
+
+      const emails = matchedUsers.map(u => u.email);
+      if (emails.length > 0) {
+        emailFilter = { in: emails };
+      } else {
+        // No matches, return early
+        return res.json({ success: true, data: [], total: 0 });
+      }
     }
-    
-    // Filter by day
-    if (day) {
-      query.day = day;
-    }
-    
-    // Filter by session
-    if (session) {
-      query.session = session;
-    }
-    
-    let sortOptions = { timestamp: -1 }; // Default sort by timestamp descending
-    
-    // Custom sorting
+
+    // 2. Build filters for Attendance
+    let whereClause = {};
+
+    if (emailFilter) whereClause.email = emailFilter;
+    if (day) whereClause.day = day;
+    if (session) whereClause.session = session;
+
+    // 3. Define sorting logic
+    let orderBy = [{ timestamp: 'desc' }]; // Default
     if (sortBy === 'day') {
-      sortOptions = { day: 1, session: 1, timestamp: -1 };
+      orderBy = [{ day: 'asc' }, { session: 'asc' }, { timestamp: 'desc' }];
     } else if (sortBy === 'session') {
-      sortOptions = { session: 1, day: 1, timestamp: -1 };
+      orderBy = [{ session: 'asc' }, { day: 'asc' }, { timestamp: 'desc' }];
     }
-    
-    const attendanceRecords = await Attendance.find(query).sort(sortOptions);
-    
-    // Populate user details for each attendance record
+
+    // 4. Fetch attendance records
+    const attendanceRecords = await prisma.attendance.findMany({
+      where: whereClause,
+      orderBy
+    });
+
+    // 5. Populate user data
     const populatedRecords = await Promise.all(
       attendanceRecords.map(async (record) => {
-        const user = await User.findOne({ email: record.email }).select('-qr');
+        const user = await prisma.user.findUnique({
+          where: { email: record.email },
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            dob: true,
+            email: true,
+            phone: true,
+            occupation: true,
+            qualification: true,
+            address: true,
+            photo: true,
+            reference: true,
+            group: true,
+            createdAt: true
+            // qr is excluded
+          }
+        });
+
         return {
-          _id: record._id,
+          id: record.id,
           email: record.email,
           day: record.day,
           session: record.session,
           timestamp: record.timestamp,
-          user: user
+          user
         };
       })
     );
-    
+
+    // 6. Send response
     res.json({
       success: true,
       data: populatedRecords,
       total: populatedRecords.length
     });
+
   } catch (error) {
     console.error("Error fetching attendance records:", error);
     res.status(500).json({
@@ -108,6 +158,8 @@ const getAttendanceRecords = async (req, res) => {
     });
   }
 };
+
+
 
 module.exports = {
   getAllUsers,

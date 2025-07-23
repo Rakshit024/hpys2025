@@ -1,12 +1,44 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 // Removed OrbitControls for manual drag
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { AnimationMixer } from 'three';
+import { FaHome } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Card3D = () => {
+  const navigate = useNavigate();
   const mountRef = useRef(null);
   const bgCanvasRef = useRef(null);
+
+  const [user, setUser] = useState(null);
+  const [showAlert, setShowAlert] = useState(false);
+  const email = new URLSearchParams(location.search).get("email");
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
+
+
+
+  useEffect(() => {
+    if (!email) return;
+
+    axios
+      .get(`${import.meta.env.VITE_BACKEND_URL}/api/getUserByEmail?email=${email}`)
+      .then((res) => {
+        console.log(res.data)
+        setUser(res.data);
+      })
+      .catch((err) => {
+        if (err.response?.status === 404) {
+          setShowAlert(true);
+          setTimeout(() => {
+            setShowAlert(false);
+            navigate("/show-card");
+          }, 3000);
+        }
+      });
+  }, [email, navigate]);
 
   useEffect(() => {
     let scene, camera, renderer, cardGroup, cardBackGroup;
@@ -150,9 +182,9 @@ const Card3D = () => {
       }
       mountRef.current.appendChild(renderer.domElement);
       // Lighting
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.25); // reduced intensity
       scene.add(ambientLight);
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 1.1);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.35); // reduced intensity
       directionalLight.position.set(5, 10, 8);
       directionalLight.castShadow = true;
       scene.add(directionalLight);
@@ -196,14 +228,14 @@ const Card3D = () => {
       const texLoader = new THREE.TextureLoader();
       const yImages = 2.7; // above the main title
       const imgZ = 0.13;
-      texLoader.load('/assets/h.png', function(hTex) {
-        const hMat = new THREE.MeshBasicMaterial({ map: hTex, transparent: true });
+      texLoader.load('/assets/hariprasadam.png', function(hTex) {
+        const hMat = new THREE.MeshBasicMaterial({ map: hTex, transparent: true, toneMapped: false, color: 0xffffff });
         const hMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.8), hMat);
         hMesh.position.set(-0.4, yImages, imgZ);
         cardGroup.add(hMesh);
       });
-      texLoader.load('/assets/p.png', function(pTex) {
-        const pMat = new THREE.MeshBasicMaterial({ map: pTex, transparent: true });
+      texLoader.load('/assets/prabodham.png', function(pTex) {
+        const pMat = new THREE.MeshBasicMaterial({ map: pTex, transparent: true, toneMapped: false, color: 0xffffff });
         const pMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.8), pMat);
         pMesh.position.set(0.4, yImages, imgZ);
         cardGroup.add(pMesh);
@@ -221,9 +253,14 @@ const Card3D = () => {
       const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 3 });
       const horizLine = new THREE.Line(lineGeom, lineMat);
       cardGroup.add(horizLine);
-      createTextPlane('Dharmik Mistry', 0.28, new THREE.Vector3(0.5, 1.0, 0.2), { fontSize: 60, color: '#FFFFFF' });
-      createTextPlane('Pulkit', 0.25, new THREE.Vector3(0.5, 0.6, 0.2), { fontSize: 52, color: '#f0c43f' });
-      createTextPlane('example@email.com', 0.25, new THREE.Vector3(0.5, 0.2, 0.2), { fontSize: 52, color: '#FFFFFF' });
+      // Position name and group beside profile picture
+      // Profile image is at (-1.1, 0.45, 0.31)
+      const nameX = -0.3; // right of profile pic
+      const nameY = 0.7;
+      const groupY = 0.35;
+     
+      createTextPlane(`${user?.first_name} ${user?.last_name}`, 0.28, new THREE.Vector3(0.5, 0.5, 0.1), { fontSize: 60, color: '#FFFFFF' });
+      createTextPlane(`${user?.group || 'N.A.'} `, 0.25, new THREE.Vector3(0.5, 0.2, 0.1), { fontSize: 52, color: '#ee8f46' });
       createTextPlane('1 - 3 AUGUST 2025', 0.22, new THREE.Vector3(0.3, -2.2, 0.1), { fontSize: 48, color: '#FFFFFF' });
       // GLTF Avatar
       const loader = new GLTFLoader();
@@ -272,10 +309,10 @@ const Card3D = () => {
       // Profile Picture
       createProfileCircleTexture('/assets/profile.png', 192).then(profileTexture => {
         // Add rp.png as a filled image inside the circle border, slightly smaller, and in front
-        const rpTexture = new THREE.TextureLoader().load('/assets/rp.png');
+        const rpTexture = new THREE.TextureLoader().load(`${import.meta.env.VITE_BACKEND_URL}/uploads/${user?.photo}`);
         const imgMat = new THREE.MeshBasicMaterial({ map: rpTexture, color: 0xffffff, toneMapped: false, transparent: false, opacity: 1 });
         const imgCircle = new THREE.Mesh(new THREE.CircleGeometry(0.48, 48), imgMat);
-        imgCircle.position.set(-1.1, 0.45, 0.31); // slightly up
+        imgCircle.position.set(-1.1, 0.45, 0.1); // move closer to card surface
         cardGroup.add(imgCircle);
         fadeableMeshes.push(imgCircle);
         // 2D unfilled circle (just border) using EllipseCurve
@@ -290,7 +327,7 @@ const Card3D = () => {
         const circleGeom = new THREE.BufferGeometry().setFromPoints(points);
         const circleMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 4, depthTest: false });
         const profileCircle = new THREE.LineLoop(circleGeom, circleMat);
-        profileCircle.position.set(-1.1, 0.45, 0.3);
+        profileCircle.position.set(-1.1, 0.45, 0.1);
         cardGroup.add(profileCircle);
         fadeableMeshes.push(profileCircle);
       });
@@ -310,15 +347,15 @@ const Card3D = () => {
       cardBackGroup.add(backPlane);
       // Replicate front side elements on the back (except personal details and profile pic)
       // h.png and p.png
-      texLoader.load('/assets/h.png', function(hTex) {
-        const hMat = new THREE.MeshBasicMaterial({ map: hTex, transparent: true });
+      texLoader.load('/assets/hariprasadam.png', function(hTex) {
+        const hMat = new THREE.MeshBasicMaterial({ map: hTex, transparent: true, toneMapped: false, color: 0xffffff });
         const hMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.8), hMat);
         hMesh.position.set(-0.4, yImages, imgZ);
         cardBackGroup.add(hMesh);
         backFadeableMeshes.push(hMesh);
       });
-      texLoader.load('/assets/p.png', function(pTex) {
-        const pMat = new THREE.MeshBasicMaterial({ map: pTex, transparent: true });
+      texLoader.load('/assets/prabodham.png', function(pTex) {
+        const pMat = new THREE.MeshBasicMaterial({ map: pTex, transparent: true, toneMapped: false, color: 0xffffff });
         const pMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.8), pMat);
         pMesh.position.set(0.4, yImages, imgZ);
         cardBackGroup.add(pMesh);
@@ -374,8 +411,8 @@ const Card3D = () => {
       // 3D quote under the card
       createTextPlane('"With Us, Within Us"', 0.22, new THREE.Vector3(0, -3.2, 0.1), { fontSize: 48, color: '#FFFFFF' });
       // QR code (already present, but move below the line)
-      texLoader.load('/assets/qr.jpg', function(texture) {
-        const qrMat = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+      texLoader.load(`${import.meta.env.VITE_BACKEND_URL}/uploads/${user?.qr}`, function(texture) {
+        const qrMat = new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false, color: 0xffffff });
         const qrMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.7, 2.7), qrMat);
         qrMesh.position.set(0, -0.4, 0.13); // larger and shifted up
         cardBackGroup.add(qrMesh);
@@ -518,7 +555,7 @@ const Card3D = () => {
       }
       cleanupBg();
     };
-  }, []);
+  }, [user]);
 
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', backgroundColor: '#0c0a1a' }}>
@@ -562,6 +599,32 @@ const Card3D = () => {
       >
         Drag to rotate the card
       </div>
+      {/* Floating Action Button */}
+      <button
+        onClick={() => navigate('/')}
+        style={{
+          position: 'fixed',
+          bottom: '2.5rem',
+          right: '2.5rem',
+          width: '64px',
+          height: '64px',
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, #e16c51 60%, #1185b2 100%)',
+          color: 'white',
+          border: 'none',
+          boxShadow: '0 4px 24px rgba(74,20,140,0.25)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '2rem',
+          zIndex: 10,
+          cursor: 'pointer',
+          transition: 'box-shadow 0.2s',
+        }}
+        aria-label="Go Home"
+      >
+        <FaHome />
+      </button>
     </div>
   );
 };

@@ -21,9 +21,11 @@ const AdminAttendance = () => {
       if (selectedSession) params.append("session", selectedSession);
       if (sortBy) params.append("sortBy", sortBy);
 
-      const response = await fetch(`/api/admin/attendance?${params}`);
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/admin/attendance?${params}`
+      );
       const data = await response.json();
-      
+
       if (data.success) {
         setAttendanceRecords(data.data);
       } else {
@@ -79,7 +81,7 @@ const AdminAttendance = () => {
     <div className="admin-attendance">
       <div className="search-section">
         <h2>Attendance Records ({attendanceRecords.length})</h2>
-        
+
         <div className="filters">
           <div className="search-box">
             <input
@@ -93,23 +95,35 @@ const AdminAttendance = () => {
               autoFocus
             />
           </div>
-          
+
           <div className="filter-group">
-            <select value={selectedDay} onChange={handleDayChange} className="filter-select">
+            <select
+              value={selectedDay}
+              onChange={handleDayChange}
+              className="filter-select"
+            >
               <option value="">All Days</option>
               <option value="Aug 1">Aug 1</option>
               <option value="Aug 2">Aug 2</option>
               <option value="Aug 3">Aug 3</option>
             </select>
-            
-            <select value={selectedSession} onChange={handleSessionChange} className="filter-select">
+
+            <select
+              value={selectedSession}
+              onChange={handleSessionChange}
+              className="filter-select"
+            >
               <option value="">All Sessions</option>
               <option value="Session 1">Session 1</option>
               <option value="Session 2">Session 2</option>
               <option value="Session 3">Session 3</option>
             </select>
-            
-            <select value={sortBy} onChange={handleSortChange} className="filter-select">
+
+            <select
+              value={sortBy}
+              onChange={handleSortChange}
+              className="filter-select"
+            >
               <option value="timestamp">Sort by Time</option>
               <option value="day">Sort by Day</option>
               <option value="session">Sort by Session</option>
@@ -134,37 +148,47 @@ const AdminAttendance = () => {
             </tr>
           </thead>
           <tbody>
-            {attendanceRecords.map((record) => (
-              <tr key={record._id}>
+            {attendanceRecords.length === 0 ? (
+              <tr>
                 <td>
-                  {record.user?.photo ? (
-                    <img 
-                      src={`/uploads/${record.user.photo}`} 
-                      alt="User" 
-                      className="user-photo"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="no-photo">No Photo</div>
-                  )}
+
+                  No data found
                 </td>
-                <td>{record.user?._id || "N/A"}</td>
-                <td>
-                  {record.user ? 
-                    `${record.user.first_name || ""} ${record.user.last_name || ""}`.trim() || "N/A" 
-                    : "N/A"
-                  }
-                </td>
-                <td>{record.email || "N/A"}</td>
-                <td>{record.user?.address || "N/A"}</td>
-                <td>{record.day || "N/A"}</td>
-                <td>{record.session || "N/A"}</td>
-                <td>{formatDate(record.timestamp)}</td>
-                <td>{formatTime(record.timestamp)}</td>
               </tr>
-            ))}
+            ) : (
+              attendanceRecords.map((record, index) => (
+                <tr key={index}>
+                  <td>
+                    {record.user?.photo ? (
+                      <img
+                        src={`/uploads/${record.user.photo}`}
+                        alt="User"
+                        className="user-photo"
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <div className="no-photo">No Photo</div>
+                    )}
+                  </td>
+                  <td>{record.user?._id || "N/A"}</td>
+                  <td>
+                    {record.user
+                      ? `${record.user.first_name || ""} ${
+                          record.user.last_name || ""
+                        }`.trim() || "N/A"
+                      : "N/A"}
+                  </td>
+                  <td>{record.email || "N/A"}</td>
+                  <td>{record.user?.address || "N/A"}</td>
+                  <td>{record.day || "N/A"}</td>
+                  <td>{record.session || "N/A"}</td>
+                  <td>{formatDate(record.timestamp)}</td>
+                  <td>{formatTime(record.timestamp)}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -172,4 +196,4 @@ const AdminAttendance = () => {
   );
 };
 
-export default React.memo(AdminAttendance); 
+export default React.memo(AdminAttendance);
