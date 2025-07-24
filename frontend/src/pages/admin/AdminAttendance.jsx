@@ -119,15 +119,7 @@ const AdminAttendance = () => {
               <option value="Session 3">Session 3</option>
             </select>
 
-            <select
-              value={sortBy}
-              onChange={handleSortChange}
-              className="filter-select"
-            >
-              <option value="timestamp">Sort by Time</option>
-              <option value="day">Sort by Day</option>
-              <option value="session">Sort by Session</option>
-            </select>
+          
           </div>
         </div>
       </div>
@@ -136,43 +128,25 @@ const AdminAttendance = () => {
         <table className="attendance-table">
           <thead>
             <tr>
-              <th>Photo</th>
-              <th>ID</th>
               <th>Name</th>
               <th>Email</th>
               <th>Address</th>
+              <th>City</th>
+              <th>Group</th>
               <th>Day</th>
               <th>Session</th>
-              <th>Date</th>
-              <th>Time</th>
             </tr>
           </thead>
           <tbody>
             {attendanceRecords.length === 0 ? (
               <tr>
-                <td>
-
+                <td style={{ textAlign: "center" }} colSpan={7}>
                   No data found
                 </td>
               </tr>
             ) : (
               attendanceRecords.map((record, index) => (
                 <tr key={index}>
-                  <td>
-                    {record.user?.photo ? (
-                      <img
-                        src={`/uploads/${record.user.photo}`}
-                        alt="User"
-                        className="user-photo"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                        }}
-                      />
-                    ) : (
-                      <div className="no-photo">No Photo</div>
-                    )}
-                  </td>
-                  <td>{record.user?._id || "N/A"}</td>
                   <td>
                     {record.user
                       ? `${record.user.first_name || ""} ${
@@ -182,10 +156,10 @@ const AdminAttendance = () => {
                   </td>
                   <td>{record.email || "N/A"}</td>
                   <td>{record.user?.address || "N/A"}</td>
+                  <td>{record.city || "N/A"}</td>
+                  <td>{record.group || "N/A"}</td>
                   <td>{record.day || "N/A"}</td>
                   <td>{record.session || "N/A"}</td>
-                  <td>{formatDate(record.timestamp)}</td>
-                  <td>{formatTime(record.timestamp)}</td>
                 </tr>
               ))
             )}

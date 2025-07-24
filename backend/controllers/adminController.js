@@ -1,6 +1,6 @@
 const User = require("../models/User");
 const Attendance = require("../models/Attendance");
-const prisma = require("../models/prisma")
+const prisma = require("../models/prisma");
 
 // Get all users with search functionality
 const getAllUsers = async (req, res) => {
@@ -13,46 +13,30 @@ const getAllUsers = async (req, res) => {
     if (search) {
       where = {
         OR: [
-          { first_name: { contains: search, mode: 'insensitive' } },
-          { last_name: { contains: search, mode: 'insensitive' } },
-          { address: { contains: search, mode: 'insensitive' } }
-        ]
+          { first_name: { contains: search, mode: "insensitive" } },
+          { last_name: { contains: search, mode: "insensitive" } },
+          { address: { contains: search, mode: "insensitive" } },
+        ],
       };
     }
 
     // Fetch users, exclude 'qr', sort by createdAt descending
     const users = await prisma.user.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        first_name: true,
-        last_name: true,
-        dob: true,
-        email: true,
-        phone: true,
-        occupation: true,
-        qualification: true,
-        address: true,
-        photo: true,
-        reference: true,
-        group: true,
-        createdAt: true
-        // Exclude qr
-      }
+      orderBy: { createdAt: "desc" },
     });
 
     res.json({
       success: true,
       data: users,
-      total: users.length
+      total: users.length,
     });
   } catch (error) {
     console.error("Error fetching users:", error);
     res.status(500).json({
       success: false,
       message: "Error fetching users",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -69,16 +53,16 @@ const getAttendanceRecords = async (req, res) => {
       const matchedUsers = await prisma.user.findMany({
         where: {
           OR: [
-            { first_name: { contains: search, mode: 'insensitive' } },
-            { last_name: { contains: search, mode: 'insensitive' } },
-            { email: { contains: search, mode: 'insensitive' } },
-            { address: { contains: search, mode: 'insensitive' } },
-          ]
+            { first_name: { contains: search, mode: "insensitive" } },
+            { last_name: { contains: search, mode: "insensitive" } },
+            { email: { contains: search, mode: "insensitive" } },
+            { address: { contains: search, mode: "insensitive" } },
+          ],
         },
-        select: { email: true }
+        select: { email: true },
       });
 
-      const emails = matchedUsers.map(u => u.email);
+      const emails = matchedUsers.map((u) => u.email);
       if (emails.length > 0) {
         emailFilter = { in: emails };
       } else {
@@ -95,17 +79,17 @@ const getAttendanceRecords = async (req, res) => {
     if (session) whereClause.session = session;
 
     // 3. Define sorting logic
-    let orderBy = [{ timestamp: 'desc' }]; // Default
-    if (sortBy === 'day') {
-      orderBy = [{ day: 'asc' }, { session: 'asc' }, { timestamp: 'desc' }];
-    } else if (sortBy === 'session') {
-      orderBy = [{ session: 'asc' }, { day: 'asc' }, { timestamp: 'desc' }];
+    let orderBy = [{ timestamp: "desc" }]; // Default
+    if (sortBy === "day") {
+      orderBy = [{ day: "asc" }, { session: "asc" }, { timestamp: "desc" }];
+    } else if (sortBy === "session") {
+      orderBy = [{ session: "asc" }, { day: "asc" }, { timestamp: "desc" }];
     }
 
     // 4. Fetch attendance records
     const attendanceRecords = await prisma.attendance.findMany({
       where: whereClause,
-      orderBy
+      orderBy,
     });
 
     // 5. Populate user data
@@ -126,9 +110,9 @@ const getAttendanceRecords = async (req, res) => {
             photo: true,
             reference: true,
             group: true,
-            createdAt: true
+            createdAt: true,
             // qr is excluded
-          }
+          },
         });
 
         return {
@@ -137,7 +121,7 @@ const getAttendanceRecords = async (req, res) => {
           day: record.day,
           session: record.session,
           timestamp: record.timestamp,
-          user
+          user,
         };
       })
     );
@@ -146,22 +130,19 @@ const getAttendanceRecords = async (req, res) => {
     res.json({
       success: true,
       data: populatedRecords,
-      total: populatedRecords.length
+      total: populatedRecords.length,
     });
-
   } catch (error) {
     console.error("Error fetching attendance records:", error);
     res.status(500).json({
       success: false,
       message: "Error fetching attendance records",
-      error: error.message
+      error: error.message,
     });
   }
 };
 
-
-
 module.exports = {
   getAllUsers,
-  getAttendanceRecords
-}; 
+  getAttendanceRecords,
+};

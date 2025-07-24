@@ -20,7 +20,7 @@ const App = () => {
         <Route path="/show-card" element={<ShowCard />} />
         <Route path="/card" element={<Card3D />} />
         <Route path="/attendance" element={<AttendanceHome />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/hpys2025-admin-panel-369" element={<Admin />} />
         <Route path="/scan" element={<ScanQR />} />
       </Routes>
     </Router>

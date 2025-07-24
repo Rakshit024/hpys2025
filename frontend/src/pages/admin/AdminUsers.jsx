@@ -21,6 +21,7 @@ const AdminUsers = () => {
         if (data.success) {
           setAllUsers(data.data);
           setUsers(data.data);
+          console.log(data)
         } else {
           setError(data.message);
         }
