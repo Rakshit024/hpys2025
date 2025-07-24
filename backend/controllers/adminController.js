@@ -104,8 +104,6 @@ const getAttendanceRecords = async (req, res) => {
             dob: true,
             email: true,
             phone: true,
-            occupation: true,
-            qualification: true,
             address: true,
             photo: true,
             reference: true,

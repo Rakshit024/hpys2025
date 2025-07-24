@@ -19,8 +19,6 @@ const UserTable = ({ users }) => {
             <th>Phone</th>
             <th>Address</th>
             <th>City</th>
-            <th>Occupation</th>
-            <th>Qualification</th>
             <th>Date of Birth</th>
             <th>Reference</th>
             <th>Group</th>
@@ -58,8 +56,6 @@ const UserTable = ({ users }) => {
               <td>{user.phone || "N/A"}</td>
               <td>{user.address || "N/A"}</td>
               <td>{user.city || "N/A"}</td>
-              <td>{user.occupation || "N/A"}</td>
-              <td>{user.qualification || "N/A"}</td>
               <td>{formatDate(user.dob)}</td>
               <td>{user.reference || "N/A"}</td>
               <td>{user.group || "N/A"}</td>

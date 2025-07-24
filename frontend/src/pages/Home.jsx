@@ -149,16 +149,6 @@ const Home = () => {
           }}
         />
         <div>
-          {/* <p
-            style={{
-              margin: 0,
-              fontSize: "0.8rem",
-              wordBreak: "break-word",
-              overflowWrap: "break-word",
-            }}
-          >
-           HPYS 2025 Channel
-          </p> */}
           <p
             style={{
               margin: 0,
@@ -167,7 +157,7 @@ const Home = () => {
               overflowWrap: "break-word",
             }}
           >
-            Stay updated with all important announcements
+           Join HPYS-2025 Telegram Channel 
           </p>
         </div>
       </div>
