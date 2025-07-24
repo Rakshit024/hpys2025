@@ -212,6 +212,7 @@ const Register = () => {
                 <img
                   src="/camara.png"
                   alt="Click your photo"
+                  accept="image/jpeg,image/jpg,image/png"
                   height={20}
                   width={20}
                 />
@@ -227,6 +228,7 @@ const Register = () => {
                 <img
                   src="/photos.png"
                   alt="Upload your photo"
+                  accept="image/jpeg,image/jpg,image/png"
                   height={20}
                   width={20}
                 />
