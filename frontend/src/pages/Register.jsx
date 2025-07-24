@@ -43,11 +43,6 @@ const Register = () => {
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Photo size should be less than 5MB");
-        return;
-      }
-
       setPhoto(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -68,6 +63,11 @@ const Register = () => {
     // --- VALIDATIONS ---
     if (!photo) {
       toast.error("Please select a photo");
+      return;
+    }
+
+    if (photo && photo.size > 3 * 1024 * 1024) {
+      toast.error("Photo size must be less than 3MB");
       return;
     }
 

@@ -120,6 +120,56 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Telegram Channel Box */}
+      <div
+        className="telegram-box glass-card fade-in"
+        onClick={() => window.open("https://t.me/+mp04cL9iHRczNWQ9", "_blank")}
+        style={{
+          padding: "0.7rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "1rem",
+          backgroundColor: "#229ED9",
+          color: "#fff",
+          cursor: "pointer",
+          borderRadius: "10px",
+          justifyContent: "center",
+          boxShadow: "0px 4px 12px rgba(0,0,0,0.2)",
+        }}
+      >
+        <img
+          src="/assets/Logo2.png"
+          alt="Telegram"
+          style={{
+            width: "35px",
+            height: "35px",
+            filter: "invert(100%) brightness(200%)",
+          }}
+        />
+        <div>
+          {/* <p
+            style={{
+              margin: 0,
+              fontSize: "0.8rem",
+              wordBreak: "break-word",
+              overflowWrap: "break-word",
+            }}
+          >
+           HPYS 2025 Channel
+          </p> */}
+          <p
+            style={{
+              margin: 0,
+              fontSize: "0.8rem",
+              wordBreak: "break-word",
+              overflowWrap: "break-word",
+            }}
+          >
+            Stay updated with all important announcements
+          </p>
+        </div>
+      </div>
+
       {/* Features Section */}
       {/* <div className="features-section glass-card fade-in">
         <h2 className="section-title">Why Choose Our System?</h2>

@@ -98,7 +98,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: "Inter", sans-serif;
  background: linear-gradient(135deg, var(--neutral-50) 0%, var(--main-orange) 100%);
 
   color: var(--neutral-900);
