@@ -273,7 +273,6 @@ const Register = () => {
                     readOnly
                     disabled
                     style={{
-                      background: "#f5f5f5",
                       cursor: "not-allowed",
                       color: formData.dob ? "#222" : "#888",
                     }}

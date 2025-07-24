@@ -108,16 +108,14 @@ const Home = () => {
           <div className="coming-soon-badge">Coming Soon</div> {/* New badge */}
           <div className="action-icon">
             <img
-              src="/gallary.png"
+              src="/schedule.png"
               alt="registration icon"
               height={40}
               width={40}
             />
           </div>
-          <h3>View Cards</h3>
-          <p>
-            Browse and search through all registered user cards and profiles
-          </p>
+          <h3>Event Schedule Walk Through</h3>
+          <p>Take a guided tour of the complete event schedule and sessions.</p>
           <div className="action-arrow">→</div>
         </div>
       </div>
