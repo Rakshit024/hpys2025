@@ -46,11 +46,13 @@ const Home = () => {
               src="/assets/hariprasadam.png"
               alt="Hariprasadam"
               style={{ height: 175, width: "auto", maxWidth: 300 }}
+              loading="eager"
             />
             <img
               src="/assets/prabodham.png"
               alt="prabodham"
               style={{ height: 175, width: "auto", maxWidth: 300 }}
+              loading="eager"
             />
           </div>
 

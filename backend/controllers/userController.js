@@ -19,6 +19,7 @@ exports.registerUser = async (req, res) => {
       email,
       phone,
       address,
+      city,
       reference,
       group,
       eduType,
@@ -30,23 +31,6 @@ exports.registerUser = async (req, res) => {
       semester,
     } = req.body;
 
-    console.log(
-      first_name,
-      last_name,
-      dob,
-      email,
-      phone,
-      address,
-      reference,
-      group,
-      eduType,
-      standard,
-      stream,
-      schoolName,
-      collegeName,
-      branch,
-      semester
-    );
 
     if (!req.file) {
       return res.status(400).json({ error: "Photo upload failed." });
@@ -97,6 +81,7 @@ exports.registerUser = async (req, res) => {
         email,
         phone,
         address,
+        city,
         reference,
         group,
         eduType,

@@ -16,6 +16,7 @@ const Register = () => {
     email: "",
     phone: "",
     address: "",
+    city: "",
     reference: "",
     group: "",
     eduType: "",
@@ -336,6 +337,15 @@ const Register = () => {
                 className="input"
                 placeholder="ADDRESS *"
                 rows="3"
+                required
+              />
+              <input
+                name="city"
+                type="text"
+                value={formData.city}
+                onChange={handleInputChange}
+                className="input"
+                placeholder="CITY *"
                 required
               />
             </div>

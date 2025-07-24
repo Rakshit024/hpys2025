@@ -22,6 +22,7 @@ model User {
   email          String   @unique
   phone          String
   address        String
+  city           String
   reference      String
   group          String
   eduType        String? // 'school' or 'college'
