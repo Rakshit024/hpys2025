@@ -1,16 +1,30 @@
 // frontend/src/pages/Register.jsx
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+// import { parse, isValid } from "date-fns";
 import "../styles/register.css";
-import { FaRegCalendarAlt, FaRegImage } from "react-icons/fa";
+import { FaInfoCircle, FaRegCalendarAlt, FaRegImage } from "react-icons/fa";
+
+const citySuggestions = [
+  "Anand",
+  "Nadiad",
+  "Vadodara",
+  "Ahmedabad",
+  "Surat",
+  "Vidhiya Nagar",
+  "Morbi",
+  "Jambusar",
+  "Bharuch",
+];
 
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     first_name: "",
+    middle_name: "",
     last_name: "",
     dob: null,
     email: "",
@@ -27,11 +41,15 @@ const Register = () => {
     branch: "",
     semester: "",
   });
+  const [filteredCities, setFilteredCities] = useState([]);
+  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
 
   const [photo, setPhoto] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [dobPickerOpen, setDobPickerOpen] = useState(false);
+  const cityBoxRef = useRef(null);
+  const dobRef = useRef(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -39,11 +57,39 @@ const Register = () => {
       ...prev,
       [name]: value,
     }));
+    if (name === "city") {
+      const filtered = citySuggestions.filter((city) =>
+        city.toLowerCase().startsWith(value.toLowerCase())
+      );
+      setFilteredCities(filtered);
+      setShowCitySuggestions(true);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dobRef.current && !dobRef.current.contains(e.target)) {
+        setDobPickerOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleCitySelect = (city) => {
+    setFormData((prev) => ({ ...prev, city }));
+    setFilteredCities([]);
+    setShowCitySuggestions(false);
   };
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+      if (!validTypes.includes(file.type)) {
+        toast.error("Only JPG, JPEG, or PNG images are allowed");
+        return;
+      }
       setPhoto(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -67,8 +113,15 @@ const Register = () => {
       return;
     }
 
-    if (photo && photo.size > 3 * 1024 * 1024) {
-      toast.error("Photo size must be less than 3MB");
+    if (photo && photo.size > 2 * 1024 * 1024) {
+      toast.error("Photo size must be less than MB");
+      return;
+    }
+    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+    if (!validTypes.includes(photo.type)) {
+      toast.error("Only JPG, JPEG, or PNG images are allowed");
+      setPhoto(null);
+      setPreview(null);
       return;
     }
 
@@ -109,6 +162,7 @@ const Register = () => {
       });
 
       formDataToSend.append("photo", photo);
+      console.log(formData.middle_name);
 
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/register`,
@@ -130,12 +184,25 @@ const Register = () => {
       }
     } catch (error) {
       console.error("Registration error:", error);
-      toast.error(error.message);
+      // toast.error(error.message);
       toast.error("Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (cityBoxRef.current && !cityBoxRef.current.contains(event.target)) {
+        setShowCitySuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="register-container">
@@ -150,6 +217,72 @@ const Register = () => {
             Join our community with a modern digital ID card featuring QR
             technology
           </p>
+        </div>
+
+        <div
+          style={{
+            border: "2px dashed red",
+            borderRadius: "12px",
+            padding: "1rem",
+            marginBottom: "2rem",
+            backgroundColor: "#fff0f0",
+          }}
+        >
+          <h3
+            style={{
+              color: "red",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+            }}
+          >
+            <FaInfoCircle style={{ color: "red", width: 30, height: 30 }} />
+            Read this Instructions before Submitting the form
+          </h3>
+          <hr style={{ borderColor: "red", marginBottom: "1rem" }} />
+          <ul
+            style={{ paddingLeft: "1.5rem", color: "#a00", lineHeight: "1.6" }}
+          >
+            <li>
+              - Upload a recent photo where your{" "}
+              <strong>face is clearly visible and recognizable</strong>. Avoid
+              full-body images. Make sure the image size is{" "}
+              <strong>less than 2MB</strong>.
+            </li>
+
+            <li>
+              - Enter your first name, father's name (middle name), and surname
+              properly.
+            </li>
+            <li>
+              - Date of birth must be in <strong>dd/MM/yyyy</strong> format
+              only.
+            </li>
+            <li>
+              - Email must be in a valid format, e.g.,{" "}
+              <strong>xyz@gmail.com</strong>.
+            </li>
+            <li>
+              - Phone number must be exactly <strong>10 digits</strong>.
+            </li>
+            <li>
+              - If you are staying in a hostel, enter your address in this
+              format:
+              <br />
+              <em>"room number, hostel name"</em> &nbsp; e.g.,{" "}
+              <strong>104, AVD</strong>.
+            </li>
+            <li>
+              - Those who are currently working or not pursuing education may
+              leave the
+              <strong> Educational Details</strong> section empty.
+            </li>
+            <li>
+              - For <strong>Reference</strong>, you may enter your group
+              leader's name.
+            </li>
+            {/* Add more points below if needed */}
+          </ul>
         </div>
 
         <form onSubmit={handleSubmit} className="register-form">
@@ -185,7 +318,7 @@ const Register = () => {
             {/* Hidden input for CAMERA (with capture) */}
             <input
               type="file"
-              accept="image/*"
+              accept="image/jpg,image/jpeg,image/png"
               capture="environment"
               onChange={handlePhotoChange}
               className="photo-input"
@@ -196,7 +329,7 @@ const Register = () => {
             {/* Hidden input for GALLERY (without capture) */}
             <input
               type="file"
-              accept="image/*"
+              accept="image/jpg,image/jpeg,image/png"
               onChange={handlePhotoChange}
               className="photo-input"
               id="gallery-input"
@@ -248,7 +381,16 @@ const Register = () => {
                 value={formData.first_name}
                 onChange={handleInputChange}
                 className="input"
-                placeholder="FIRST NAME *"
+                placeholder="FIRST NAME (YOUR NAME) *"
+                required
+              />
+              <input
+                name="middle_name"
+                type="text"
+                value={formData.middle_name}
+                onChange={handleInputChange}
+                className="input"
+                placeholder="MIDDLE NAME (FATHER's NAME) *"
                 required
               />
 
@@ -258,25 +400,27 @@ const Register = () => {
                 value={formData.last_name}
                 onChange={handleInputChange}
                 className="input"
-                placeholder="LAST NAME *"
+                placeholder="LAST NAME (SURNAME) *"
                 required
               />
 
               <div className="form-group dob-group">
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div
+                  ref={dobRef}
+                  style={{ display: "flex", alignItems: "center", gap: 8 }}
+                >
                   <input
                     name="dob"
                     type="text"
                     value={
                       formData.dob
                         ? formData.dob.toLocaleDateString("en-GB")
-                        : "DATE OF BIRTH *"
+                        : "DATE OF BIRTH (eg: 17/08/1953) *"
                     }
                     className="input"
+                    onClick={() => setDobPickerOpen(true)}
                     readOnly
-                    disabled
                     style={{
-                      cursor: "not-allowed",
                       color: formData.dob ? "#222" : "#888",
                     }}
                   />
@@ -293,21 +437,21 @@ const Register = () => {
                   >
                     <FaRegCalendarAlt size={24} />
                   </button>
+                  {dobPickerOpen && (
+                    <div style={{ position: "absolute", zIndex: 10 }}>
+                      <DatePicker
+                        selected={formData.dob}
+                        onChange={handleDateChange}
+                        inline
+                        maxDate={new Date()}
+                        showMonthDropdown
+                        showYearDropdown
+                        dropdownMode="select"
+                        dateFormat="dd-MM-yyyy"
+                      />
+                    </div>
+                  )}
                 </div>
-                {dobPickerOpen && (
-                  <div style={{ position: "absolute", zIndex: 10 }}>
-                    <DatePicker
-                      selected={formData.dob}
-                      onChange={handleDateChange}
-                      inline
-                      maxDate={new Date()}
-                      showMonthDropdown
-                      showYearDropdown
-                      dropdownMode="select"
-                      dateFormat="dd-MM-yyyy"
-                    />
-                  </div>
-                )}
               </div>
 
               <input
@@ -316,17 +460,18 @@ const Register = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 className="input"
-                placeholder="EMAIL ADDRESS *"
+                placeholder="EMAIL ADDRESS (eg: abc@gmail.com) *"
                 required
               />
 
               <input
                 name="phone"
                 type="tel"
+                maxLength={10}
                 value={formData.phone}
                 onChange={handleInputChange}
                 className="input"
-                placeholder="PHONE NUMBER *"
+                placeholder="PHONE NUMBER (10 digits) *"
                 required
               />
 
@@ -339,15 +484,53 @@ const Register = () => {
                 rows="3"
                 required
               />
-              <input
-                name="city"
-                type="text"
-                value={formData.city}
-                onChange={handleInputChange}
-                className="input"
-                placeholder="CITY *"
-                required
-              />
+              <div ref={cityBoxRef} style={{ position: "relative" }}>
+                <input
+                  name="city"
+                  type="text"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  className="input"
+                  placeholder="CITY (eg: ANAND) *"
+                  required
+                  autoComplete="off"
+                />
+
+                {showCitySuggestions && filteredCities.length > 0 && (
+                  <ul
+                    className="suggestions-list"
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: 0,
+                      right: 0,
+                      backgroundColor: "#fff",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                      maxHeight: "350px",
+                      overflowY: "auto",
+                      zIndex: 1000,
+                      padding: "0",
+                      margin: "4px 0 0 0",
+                      listStyleType: "none",
+                    }}
+                  >
+                    {filteredCities.map((city, index) => (
+                      <li
+                        key={index}
+                        onClick={() => handleCitySelect(city)}
+                        style={{
+                          padding: "8px",
+                          cursor: "pointer",
+                          borderBottom: "1px solid #eee",
+                        }}
+                      >
+                        {city}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </div>
           </div>
 
@@ -469,7 +652,7 @@ const Register = () => {
                 value={formData.reference}
                 onChange={handleInputChange}
                 className="input"
-                placeholder="REFERENCE"
+                placeholder="REFERENCE (eg: LEADER_NAME) *"
               />
 
               <select

@@ -7,6 +7,8 @@ const getAllUsers = async (req, res) => {
   try {
     const { search } = req.query;
 
+    console.log("request comes")
+
     let where = {};
 
     // Search by first_name, last_name, or address (case-insensitive)
@@ -14,6 +16,7 @@ const getAllUsers = async (req, res) => {
       where = {
         OR: [
           { first_name: { contains: search, mode: "insensitive" } },
+          { middle_name: { contains: search, mode: "insensitive" } },
           { last_name: { contains: search, mode: "insensitive" } },
           { address: { contains: search, mode: "insensitive" } },
         ],
@@ -54,6 +57,7 @@ const getAttendanceRecords = async (req, res) => {
         where: {
           OR: [
             { first_name: { contains: search, mode: "insensitive" } },
+            { middle_name: { contains: search, mode: "insensitive" } },
             { last_name: { contains: search, mode: "insensitive" } },
             { email: { contains: search, mode: "insensitive" } },
             { address: { contains: search, mode: "insensitive" } },
@@ -100,6 +104,7 @@ const getAttendanceRecords = async (req, res) => {
           select: {
             id: true,
             first_name: true,
+            middle_name: true,
             last_name: true,
             dob: true,
             email: true,

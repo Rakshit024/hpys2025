@@ -14,6 +14,7 @@ const UserTable = ({ users }) => {
             {/* <th>Photo</th> */}
             {/* <th>ID</th> */}
             <th>First Name</th>
+            <th>Middle Name</th>
             <th>Last Name</th>
             <th>Email</th>
             <th>Phone</th>
@@ -51,6 +52,7 @@ const UserTable = ({ users }) => {
               </td> */}
               {/* <td>{user.id}</td> */}
               <td>{user.first_name || "N/A"}</td>
+              <td>{user.middle_name || "N/A"}</td>
               <td>{user.last_name || "N/A"}</td>
               <td>{user.email || "N/A"}</td>
               <td>{user.phone || "N/A"}</td>

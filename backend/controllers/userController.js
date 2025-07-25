@@ -14,6 +14,7 @@ exports.registerUser = async (req, res) => {
   try {
     const {
       first_name,
+      middle_name,
       last_name,
       dob,
       email,
@@ -30,7 +31,6 @@ exports.registerUser = async (req, res) => {
       branch,
       semester,
     } = req.body;
-
 
     if (!req.file) {
       return res.status(400).json({ error: "Photo upload failed." });
@@ -76,6 +76,7 @@ exports.registerUser = async (req, res) => {
     const newUser = await prisma.user.create({
       data: {
         first_name,
+        middle_name,
         last_name,
         dob: new Date(dob),
         email,

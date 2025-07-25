@@ -1,10 +1,10 @@
 const express = require("express");
 const multer = require("multer");
-const path = require("path");
-const prisma = require('../models/prisma');
+// const path = require("path");
+const prisma = require("../models/prisma");
 const {
   registerUser,
-  getUserByEmail,
+  // getUserByEmail,
 } = require("../controllers/userController");
 const User = require("../models/User"); // ✅ only once
 const router = express.Router(); // ✅ declared only once
@@ -18,7 +18,8 @@ const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+    console.log(file.mimetype);
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
@@ -27,13 +28,15 @@ const upload = multer({
   },
 });
 
-
 router.post("/register", upload.single("photo"), registerUser);
+
 router.get("/getUserByEmail", async (req, res) => {
   const rawEmail = req.query.email;
   const email = decodeURIComponent(rawEmail || "").toLowerCase();
 
-  if (!email){ return res.status(400).send("Email required");}
+  if (!email) {
+    return res.status(400).send("Email required");
+  }
 
   try {
     console.log("Looking for email:", email);
@@ -42,9 +45,9 @@ router.get("/getUserByEmail", async (req, res) => {
       where: {
         email: {
           equals: email,
-          mode: 'insensitive' // case-insensitive match
-        }
-      }
+          mode: "insensitive", // case-insensitive match
+        },
+      },
     });
 
     if (!user) {

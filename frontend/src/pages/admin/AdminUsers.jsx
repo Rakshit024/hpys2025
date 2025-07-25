@@ -16,12 +16,16 @@ const AdminUsers = () => {
     const fetchAllUsers = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/users`);
+        console.log("Data fetch");
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/admin/users`
+        );
+        console.log(response);
         const data = await response.json();
         if (data.success) {
           setAllUsers(data.data);
           setUsers(data.data);
-          console.log(data)
+          console.log(data);
         } else {
           setError(data.message);
         }
@@ -45,6 +49,7 @@ const AdminUsers = () => {
         allUsers.filter(
           (u) =>
             (u.first_name && u.first_name.toLowerCase().includes(lower)) ||
+            (u.middle_name && u.middle_name.toLowerCase().includes(lower)) ||
             (u.last_name && u.last_name.toLowerCase().includes(lower)) ||
             (u.address && u.address.toLowerCase().includes(lower))
         )
@@ -75,4 +80,4 @@ const AdminUsers = () => {
   );
 };
 
-export default React.memo(AdminUsers); 
+export default React.memo(AdminUsers);

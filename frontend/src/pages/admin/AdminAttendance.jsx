@@ -8,7 +8,7 @@ const AdminAttendance = () => {
   const debouncedSearch = useDebounce(searchTerm, 400);
   const [selectedDay, setSelectedDay] = useState("");
   const [selectedSession, setSelectedSession] = useState("");
-  const [sortBy, setSortBy] = useState("timestamp");
+  // const [sortBy, setSortBy] = useState("timestamp");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -19,7 +19,7 @@ const AdminAttendance = () => {
       if (search) params.append("search", search);
       if (selectedDay) params.append("day", selectedDay);
       if (selectedSession) params.append("session", selectedSession);
-      if (sortBy) params.append("sortBy", sortBy);
+      // if (sortBy) params.append("sortBy", sortBy);
 
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/admin/attendance?${params}`
@@ -41,7 +41,7 @@ const AdminAttendance = () => {
 
   useEffect(() => {
     fetchAttendance(debouncedSearch);
-  }, [debouncedSearch, selectedDay, selectedSession, sortBy]);
+  }, [debouncedSearch, selectedDay, selectedSession]);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -55,19 +55,19 @@ const AdminAttendance = () => {
     setSelectedSession(e.target.value);
   };
 
-  const handleSortChange = (e) => {
-    setSortBy(e.target.value);
-  };
+  // const handleSortChange = (e) => {
+  //   setSortBy(e.target.value);
+  // };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString();
-  };
+  // const formatDate = (dateString) => {
+  //   if (!dateString) return "N/A";
+  //   return new Date(dateString).toLocaleDateString();
+  // };
 
-  const formatTime = (dateString) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleTimeString();
-  };
+  // const formatTime = (dateString) => {
+  //   if (!dateString) return "N/A";
+  //   return new Date(dateString).toLocaleTimeString();
+  // };
 
   if (loading) {
     return <div className="loading">Loading attendance records...</div>;
@@ -149,7 +149,7 @@ const AdminAttendance = () => {
                 <tr key={index}>
                   <td>
                     {record.user
-                      ? `${record.user.first_name || ""} ${
+                      ? `${record.user.first_name || ""} ${record.user.middle_name ||  ""} ${
                           record.user.last_name || ""
                         }`.trim() || "N/A"
                       : "N/A"}
