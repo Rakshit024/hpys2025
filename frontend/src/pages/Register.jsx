@@ -114,7 +114,7 @@ const Register = () => {
     }
 
     if (photo && photo.size > 2 * 1024 * 1024) {
-      toast.error("Photo size must be less than MB");
+      toast.error("Photo size must be less than 2MB");
       return;
     }
     const validTypes = ["image/jpeg", "image/jpg", "image/png"];
