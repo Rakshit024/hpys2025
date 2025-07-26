@@ -42,8 +42,8 @@ exports.groupData = async (req, res) => {
     }
 
     const data = await prisma.user.findMany({
-      orderBy:{
-        createdAt:'desc'
+      orderBy: {
+        createdAt: "desc",
       },
       where: {
         group: user.group,
@@ -73,11 +73,11 @@ exports.paymentDone = async (req, res) => {
   try {
     const { payment_status, id } = req.body;
 
-    if (payment_status ===null || payment_status === undefined) {
+    if (payment_status === null || payment_status === undefined) {
       return res.status(400).json({ error: "Pyament status is required" });
     }
 
-    console.log(payment_status,id)
+    console.log(payment_status, id);
 
     const changeStatus = await prisma.user.update({
       where: {
@@ -88,6 +88,29 @@ exports.paymentDone = async (req, res) => {
       },
     });
     return res.status(200).json({ success: true, data: changeStatus });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server Error" });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "Id is required" });
+    }
+
+    const deletedId = await prisma.user.delete({
+      where: {
+        id: id,
+      },
+      select: {
+        id: true,
+      },
+    });
+    return res.status(200).json({ success: true, deletedId });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal server Error" });

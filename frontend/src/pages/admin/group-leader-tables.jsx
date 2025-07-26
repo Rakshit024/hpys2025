@@ -21,12 +21,14 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  IconButton,
 } from "@mui/material";
+import { DeleteOutline } from "@mui/icons-material";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const GroupLeaderTables = () => {
-  const [searchEmail, setSearchEmail] = useState("");
+  const [searchName, setSearchName] = useState("");
   const [filteredRows, setFilteredRows] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const { email } = useParams();
@@ -36,8 +38,10 @@ const GroupLeaderTables = () => {
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  // const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-  // Fetch data for group leader
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteRow, setDeleteRow] = useState(null);
+
   useEffect(() => {
     if (!email) {
       navigate("/hpys2025-group-leader-panel-369");
@@ -46,16 +50,13 @@ const GroupLeaderTables = () => {
 
     const fetchGroupData = async () => {
       setIsLoading(true);
-      // await sleep(3000);
       try {
         const response = await axios.get(
-          `${
-            import.meta.env.VITE_BACKEND_URL
-          }/api/leader/get-group-data/${email}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/leader/get-group-data/${email}`
         );
         if (response.status === 200 && response.data.data) {
           setFilteredRows(response.data.data);
-          setAllRows(response.data.data); // store full list
+          setAllRows(response.data.data);
         }
       } catch (error) {
         console.error("Axios error:", error);
@@ -67,36 +68,27 @@ const GroupLeaderTables = () => {
     fetchGroupData();
   }, [email, navigate]);
 
-  // Filter by email
   useEffect(() => {
-    if (searchEmail.trim() === "") {
-      setFilteredRows(allRows); // restore all rows
+    if (searchName.trim() === "") {
+      setFilteredRows(allRows);
     } else {
       setFilteredRows(
         allRows.filter((row) =>
-          row.email.toLowerCase().includes(searchEmail.toLowerCase())
+          `${row.first_name} ${row.middle_name} ${row.last_name}`
+            .toLowerCase()
+            .includes(searchName.toLowerCase())
         )
       );
     }
-  }, [searchEmail, allRows]);
-
-  // Update payment_status in backend and frontend
+  }, [searchName, allRows]);
 
   const updatePaymentStatus = async (id, payment_status) => {
     try {
-      setIsStatusUpdating(id); // start spinner for this row
-
+      setIsStatusUpdating(id);
       const res = await axios.patch(
         `${import.meta.env.VITE_BACKEND_URL}/api/leader/payment-done`,
-        {
-          id,
-          payment_status,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { id, payment_status },
+        { headers: { "Content-Type": "application/json" } }
       );
 
       if (res.status === 200) {
@@ -122,6 +114,28 @@ const GroupLeaderTables = () => {
     }
   };
 
+  const handleDeleteClick = (row) => {
+    setDeleteRow(row);
+    setDeleteOpen(true);
+  };
+
+  const handleDeleteUser = async () => {
+    try {
+      const res = await axios.delete(
+        `${import.meta.env.VITE_BACKEND_URL}/api/leader/delete-user/${deleteRow.id}`
+      );
+      if (res.status === 200) {
+        setFilteredRows((prev) => prev.filter((r) => r.id !== deleteRow.id));
+        setAllRows((prev) => prev.filter((r) => r.id !== deleteRow.id));
+      }
+    } catch (error) {
+      console.error("Delete failed:", error);
+    } finally {
+      setDeleteOpen(false);
+      setDeleteRow(null);
+    }
+  };
+
   const groupName = filteredRows.length > 0 ? filteredRows[0].group : "N/A";
   const totalPaid = filteredRows.filter(
     (row) => row.payment_status === true
@@ -135,7 +149,6 @@ const GroupLeaderTables = () => {
             Group Leader - Registered Participants
           </Typography>
 
-          {/* Summary Card */}
           <Card elevation={3} sx={{ width: "100%", mb: 2 }}>
             <CardContent
               sx={{
@@ -149,71 +162,37 @@ const GroupLeaderTables = () => {
               }}
             >
               <Box>
-                <Typography
-                  variant="body1"
-                  sx={{ fontWeight: "bold", fontSize: { xs: 14, sm: 16 } }}
-                >
+                <Typography variant="body1" sx={{ fontWeight: "bold" }}>
                   Group Name
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ fontSize: { xs: 13, sm: 15 }, wordBreak: "break-word" }}
-                >
-                  {groupName}
-                </Typography>
+                <Typography variant="body2">{groupName}</Typography>
               </Box>
-
               <Box>
-                <Typography
-                  variant="body1"
-                  sx={{ fontWeight: "bold", fontSize: { xs: 14, sm: 16 } }}
-                >
+                <Typography variant="body1" sx={{ fontWeight: "bold" }}>
                   Total Registered Users
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ fontSize: { xs: 13, sm: 15 } }}
-                >
-                  {filteredRows.length}
-                </Typography>
+                <Typography variant="body2">{filteredRows.length}</Typography>
               </Box>
-
               <Box>
-                <Typography
-                  variant="body1"
-                  sx={{ fontWeight: "bold", fontSize: { xs: 14, sm: 16 } }}
-                >
+                <Typography variant="body1" sx={{ fontWeight: "bold" }}>
                   Payment Done
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ fontSize: { xs: 13, sm: 15 } }}
-                >
-                  {totalPaid}
-                </Typography>
+                <Typography variant="body2">{totalPaid}</Typography>
               </Box>
             </CardContent>
           </Card>
 
-          {/* Search Input */}
           <TextField
-            label="Search by Email"
+            label="Search by Name"
             variant="outlined"
             size="small"
             fullWidth
-            value={searchEmail}
-            onChange={(e) => setSearchEmail(e.target.value)}
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
             sx={{ mb: 2 }}
           />
 
-          {/* Table */}
-          <TableContainer
-            component={Paper}
-            sx={{
-              overflowX: "auto",
-              maxHeight: "70vh",
-            }}
-          >
+          <TableContainer component={Paper} sx={{ maxHeight: "70vh" }}>
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow>
@@ -222,18 +201,18 @@ const GroupLeaderTables = () => {
                   <TableCell>Middle Name</TableCell>
                   <TableCell>Last Name</TableCell>
                   <TableCell>Address</TableCell>
-                  <TableCell>Group</TableCell>
                   <TableCell>Email</TableCell>
                   <TableCell>Phone</TableCell>
                   <TableCell>City</TableCell>
                   <TableCell>Paid?</TableCell>
+                  <TableCell>Delete</TableCell>
                 </TableRow>
               </TableHead>
 
               <TableBody>
                 {filteredRows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={10} align="center">
+                    <TableCell colSpan={11} align="center">
                       No data found
                     </TableCell>
                   </TableRow>
@@ -260,14 +239,10 @@ const GroupLeaderTables = () => {
                           />
                         )}
                       </TableCell>
-
                       <TableCell>{row.first_name || "N.A."}</TableCell>
                       <TableCell>{row.middle_name || "N.A."}</TableCell>
                       <TableCell>{row.last_name || "N.A."}</TableCell>
-                      <TableCell sx={{ minWidth: 100 }}>
-                        {row.address}
-                      </TableCell>
-                      <TableCell>{row.group}</TableCell>
+                      <TableCell sx={{ minWidth: 100 }}>{row.address}</TableCell>
                       <TableCell sx={{ minWidth: 150 }}>{row.email}</TableCell>
                       <TableCell>{row.phone}</TableCell>
                       <TableCell>{row.city}</TableCell>
@@ -281,6 +256,14 @@ const GroupLeaderTables = () => {
                           {row.payment_status ? "Yes" : "No"}
                         </span>
                       </TableCell>
+                      <TableCell>
+                        <IconButton
+                          color="error"
+                          onClick={() => handleDeleteClick(row)}
+                        >
+                          <DeleteOutline />
+                        </IconButton>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -290,7 +273,6 @@ const GroupLeaderTables = () => {
         </Box>
       )}
 
-      {/* Loading */}
       <Backdrop
         sx={{
           backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -298,11 +280,10 @@ const GroupLeaderTables = () => {
         }}
         open={isLoading}
       >
-        <CircularProgress sx={{ color: "#8B0000" }} size={50} />{" "}
-        {/* ⬅️ increase size here */}
+        <CircularProgress sx={{ color: "#8B0000" }} size={50} />
       </Backdrop>
 
-      {/* Confirmation Dialog */}
+      {/* Confirm Uncheck Dialog */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <DialogTitle>Confirm Uncheck</DialogTitle>
         <DialogContent>
@@ -312,11 +293,7 @@ const GroupLeaderTables = () => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => setConfirmOpen(false)}
-            color="primary"
-            variant="outlined"
-          >
+          <Button onClick={() => setConfirmOpen(false)} variant="outlined">
             Cancel
           </Button>
           <Button
@@ -325,10 +302,29 @@ const GroupLeaderTables = () => {
               setConfirmOpen(false);
               setSelectedRow(null);
             }}
-            color="info"
             variant="contained"
+            color="info"
           >
             Yes, Uncheck
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Confirm Delete Dialog */}
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to <strong>delete</strong> this participant
+            permanently?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteOpen(false)} variant="outlined">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteUser} color="error" variant="contained">
+            Yes, Delete
           </Button>
         </DialogActions>
       </Dialog>
