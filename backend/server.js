@@ -5,6 +5,7 @@ const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const leaderRouter = require('./routes/leader.route')
 
 
 require("dotenv").config();
@@ -22,6 +23,7 @@ app.use("/api/attendance", attendanceRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use("/api", userRoutes);
+app.use('/api/leader',leaderRouter)
 
 // Serve static files from the React build
 app.use(express.static(path.join(__dirname, 'view/dist')));

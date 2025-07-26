@@ -1,5 +1,5 @@
 // frontend/src/pages/Home.jsx
-import React, { useState, useEffect } from "react";
+// import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/home.css";
 
@@ -59,9 +59,11 @@ const Home = () => {
           <div>
             <h1 className="heading-font">Hari Prabodham</h1>
             <h1 className="heading-font"> Youth Shibir</h1>
+            <h3 className="heading-font-small">2025</h3>
           </div>
 
           <p className="hero-subtitle">With Us, Within Us, Surrounding Us</p>
+          <h1 className="heading-font-small">1 - 3 August</h1>
         </div>
       </div>
 
@@ -157,7 +159,7 @@ const Home = () => {
               overflowWrap: "break-word",
             }}
           >
-           Join HPYS-2025 Telegram Channel 
+            Join HPYS-2025 Telegram Channel
           </p>
         </div>
       </div>

@@ -30,6 +30,7 @@ const UserTable = ({ users }) => {
             <th>College Name</th>
             <th>Branch</th>
             <th>Semester</th>
+            <th>paid?</th>
             <th>Registered On</th>
           </tr>
         </thead>
@@ -68,6 +69,7 @@ const UserTable = ({ users }) => {
               <td>{user.collegeName || "N/A"}</td>
               <td>{user.branch || "N/A"}</td>
               <td>{user.semester || "N/A"}</td>
+              <td>{user.payment_status ? "Yes" : "No"}</td>
               <td>{formatDate(user.createdAt)}</td>
             </tr>
           ))}
