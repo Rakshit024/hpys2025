@@ -1,5 +1,5 @@
 // frontend/src/pages/Home.jsx
-// import React from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/home.css";
 

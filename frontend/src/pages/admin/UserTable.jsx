@@ -2,7 +2,7 @@ import React from "react";
 
 const UserTable = ({ users }) => {
   const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
+    if (!dateString) {return "N/A"};
     return new Date(dateString).toLocaleDateString();
   };
 
