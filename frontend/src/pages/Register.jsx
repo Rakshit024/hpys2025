@@ -107,22 +107,19 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // --- VALIDATIONS ---
-    if (!photo) {
-      toast.error("Please select a photo");
-      return;
-    }
-
     if (photo && photo.size > 2 * 1024 * 1024) {
       toast.error("Photo size must be less than 2MB");
       return;
     }
-    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
-    if (!validTypes.includes(photo.type)) {
-      toast.error("Only JPG, JPEG, or PNG images are allowed");
-      setPhoto(null);
-      setPreview(null);
-      return;
+
+    if (photo) {
+      const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+      if (!validTypes.includes(photo.type)) {
+        toast.error("Only JPG, JPEG, or PNG images are allowed");
+        setPhoto(null);
+        setPreview(null);
+        return;
+      }
     }
 
     if (!formData.dob) {
@@ -161,8 +158,10 @@ const Register = () => {
         }
       });
 
-      formDataToSend.append("photo", photo);
-      console.log(formData.middle_name);
+      if (photo) {
+        formDataToSend.append("photo", photo);
+        console.log(formData.middle_name);
+      }
 
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/register`,
@@ -244,7 +243,7 @@ const Register = () => {
             style={{ paddingLeft: "1.5rem", color: "#a00", lineHeight: "1.6" }}
           >
             <li>
-              - Upload a recent photo where your{" "}
+              - Upload a recent photo(Optional) where your{" "}
               <strong>face is clearly visible and recognizable</strong>. Avoid
               full-body images. Make sure the image size is{" "}
               <strong>less than 2MB</strong>.
@@ -310,7 +309,7 @@ const Register = () => {
                     margin: "0 auto",
                   }}
                 >
-                  <FaRegImage size={64} color="#bbb" />
+                  <FaRegImage size={64} color="#bbb" />(Optional)
                 </div>
               )}
             </div>
@@ -689,7 +688,15 @@ const Register = () => {
                 <option value="swadharm (Nadiad - city)">
                   Swadharm (Nadiad - city)
                 </option>
-                <option value="Nadiad Gramya">Nadiad Gramya</option>
+                <option value="Bhakti(Nadiyad Gramya)">
+                  Bhakti(Nadiyad Gramya)
+                </option>
+                <option value="Parabhakti(Nadiyad Gramya)">
+                  Parabhakti(Nadiyad Gramya)
+                </option>
+                <option value="Anuvruti(Nadiyad Gramya)">
+                  Anuvruti(Nadiyad Gramya)
+                </option>
                 <option value="Mahemdavad">Mahemdavad</option>
               </select>
             </div>

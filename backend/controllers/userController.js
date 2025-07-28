@@ -32,30 +32,30 @@ exports.registerUser = async (req, res) => {
       semester,
     } = req.body;
 
-    if (!req.file) {
-      return res.status(400).json({ error: "Photo upload failed." });
-    }
-
     if (!dob || !isValidDateString(dob)) {
       return res
         .status(400)
         .json({ error: "Invalid or missing date of birth." });
     }
 
-    const photoPath = path.join(__dirname, "../uploads/", req.file.filename);
-    const compressedFilename = `compressed-${req.file.filename}`;
-    const compressedPath = path.join(
-      __dirname,
-      "../uploads/",
-      compressedFilename
-    );
+    let compressedFilename = null;
 
-    // Compress image
-    await sharp(photoPath)
-      .resize(500)
-      .jpeg({ quality: 70 })
-      .toFile(compressedPath);
-    fs.unlinkSync(photoPath);
+    if (req.file) {
+      const photoPath = path.join(__dirname, "../uploads/", req.file.filename);
+      compressedFilename = `compressed-${req.file.filename}`;
+      const compressedPath = path.join(
+        __dirname,
+        "../uploads/",
+        compressedFilename
+      );
+
+      // Compress image
+      await sharp(photoPath)
+        .resize(500)
+        .jpeg({ quality: 70 })
+        .toFile(compressedPath);
+      fs.unlinkSync(photoPath);
+    }
 
     // Generate QR code
     const qrFilename = `${email}-qr.png`;
@@ -92,7 +92,7 @@ exports.registerUser = async (req, res) => {
         collegeName: collegeName || null,
         branch: branch || null,
         semester: semester || null,
-        photo: compressedFilename,
+        photo: compressedFilename || null,
         qr: qrFilename,
       },
     });

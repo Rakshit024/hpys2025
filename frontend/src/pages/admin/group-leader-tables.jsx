@@ -114,10 +114,10 @@ const GroupLeaderTables = () => {
     }
   };
 
-  const handleDeleteClick = (row) => {
-    setDeleteRow(row);
-    setDeleteOpen(true);
-  };
+  // const handleDeleteClick = (row) => {
+  //   setDeleteRow(row);
+  //   setDeleteOpen(true);
+  // };
 
   const handleDeleteUser = async () => {
     try {
@@ -205,7 +205,7 @@ const GroupLeaderTables = () => {
                   <TableCell>Phone</TableCell>
                   <TableCell>City</TableCell>
                   <TableCell>Paid?</TableCell>
-                  <TableCell>Delete</TableCell>
+                  {/* <TableCell>Delete</TableCell> */}
                 </TableRow>
               </TableHead>
 
@@ -256,14 +256,14 @@ const GroupLeaderTables = () => {
                           {row.payment_status ? "Yes" : "No"}
                         </span>
                       </TableCell>
-                      <TableCell>
+                      {/* <TableCell>
                         <IconButton
                           color="error"
                           onClick={() => handleDeleteClick(row)}
                         >
                           <DeleteOutline />
                         </IconButton>
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   ))
                 )}

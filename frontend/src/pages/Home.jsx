@@ -59,11 +59,11 @@ const Home = () => {
           <div>
             <h1 className="heading-font">Hari Prabodham</h1>
             <h1 className="heading-font"> Youth Shibir</h1>
-            <h3 className="heading-font-small">2025</h3>
+          
           </div>
 
           <p className="hero-subtitle">With Us, Within Us, Surrounding Us</p>
-          <h1 className="heading-font-small">1 - 3 August</h1>
+          <h1 className="heading-font-small">1 - 3 August 2025</h1>
         </div>
       </div>
 
