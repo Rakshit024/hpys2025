@@ -125,7 +125,7 @@ const Home = () => {
       </div>
 
       {/* Telegram Channel Box */}
-      <div
+      {/* <div
         className="telegram-box glass-card fade-in"
         onClick={() => window.open("https://t.me/+mp04cL9iHRczNWQ9", "_blank")}
         style={{
@@ -162,7 +162,7 @@ const Home = () => {
             Join HPYS-2025 Telegram Channel
           </p>
         </div>
-      </div>
+      </div> */}
 
       {/* Features Section */}
       {/* <div className="features-section glass-card fade-in">
