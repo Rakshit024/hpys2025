@@ -86,11 +86,11 @@ const Home = () => {
           <div className="action-arrow">→</div>
         </div>
 
-        <div
+       {/*  <div
           className="action-card glass-card scale-in"
           // onClick={() => handleNavigation("/show-card")}
         >
-          <div className="coming-soon-badge">Coming Soon</div> {/* New badge */}
+          <div className="coming-soon-badge">Coming Soon</div> 
           <div className="action-icon">
             <img
               src="/gallary.png"
@@ -105,11 +105,13 @@ const Home = () => {
           </p>
           <div className="action-arrow">→</div>
         </div>
+        
+        */}
         <div
           className="action-card glass-card scale-in"
-          // onClick={() => handleNavigation("/show-card")}
+          onClick={() => window.location.href='https://www.figma.com/proto/ecwjGqNBJNi5g9PJM37IXq/Youth-Shibir---2025?page-id=0%3A1&node-id=88-70&viewport=446%2C-269%2C0.21&t=qGVv1AZujpG1YE8s-1&scaling=min-zoom&content-scaling=fixed'}
         >
-          <div className="coming-soon-badge">Coming Soon</div> {/* New badge */}
+          {/* <div className="coming-soon-badge">Coming Soon</div> New badge */}
           <div className="action-icon">
             <img
               src="/schedule.png"

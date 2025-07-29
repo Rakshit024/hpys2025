@@ -256,7 +256,7 @@ const Card = () => {
     const photoTexture = new THREE.TextureLoader().load(
       user.photo
         ? `${BACKEND_URL}/uploads/${user.photo}`
-        : "/profile.jpeg"
+        : "/profile.png"
     );
     photoTexture.minFilter = THREE.LinearFilter;
     photoTexture.magFilter = THREE.LinearFilter;
@@ -844,7 +844,7 @@ const Card = () => {
                   }}
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = "/profile.jpeg";
+                    e.target.src = "/profile.png";
                   }}
                 />
               </div>
