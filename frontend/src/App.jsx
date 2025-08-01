@@ -12,6 +12,8 @@ import { Toaster } from "react-hot-toast";
 import GroupLeader from "./pages/admin/group-leader-id-page";
 import GroupLeaderTables from "./pages/admin/group-leader-tables";
 import Navbar from "./components/navbar";
+import GroupLeaderPanelTables from "./pages/admin/group-leader-panel-tables";
+import GroupLeaderLoginPage from "./pages/admin/group-leader-login";
 const App = () => {
   return (
     <>
@@ -42,7 +44,25 @@ const App = () => {
               </>
             }
           />
-        </Routes>
+        <Route
+          path="/hpys2025-group-leader-369/:group"
+          element={
+            <>
+              <Navbar />
+              <GroupLeaderPanelTables />
+            </>
+          }
+          />
+        <Route
+          path="/hpys2025-group-leader-369"
+          element={
+            <>
+              <Navbar />
+              <GroupLeaderLoginPage />
+            </>
+          }
+          />
+          </Routes>
       </Router>
       <Toaster position="top-center" reverseOrder={false} />
     </>

@@ -50,6 +50,21 @@ model Attendance {
 
 model Leaders {
   id    Int    @id @default(autoincrement())
-  group  String
+  group String
   email String @unique
+}
+
+model HpysReg {
+  id        Int     @id @default(autoincrement())
+  full_name String
+  phone     String?
+  reference String
+  group     String
+  s1        Boolean @default(false)
+  s2        Boolean @default(false)
+  s3        Boolean @default(false)
+  s4        Boolean @default(false)
+  s5        Boolean @default(false)
+  friday    Boolean @default(false)
+  saturday  Boolean @default(false)
 }

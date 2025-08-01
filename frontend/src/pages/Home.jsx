@@ -1,14 +1,14 @@
 // frontend/src/pages/Home.jsx
 import React from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import "../styles/home.css";
 
 const Home = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  const handleNavigation = (path) => {
-    navigate(path);
-  };
+  // const handleNavigation = (path) => {
+  //   navigate(path);
+  // };
 
   return (
     <div className="home-container">
@@ -69,7 +69,7 @@ const Home = () => {
 
       {/* Action Cards */}
       <div className="actions-grid">
-        <div
+        {/* <div
           className="action-card glass-card scale-in"
           onClick={() => handleNavigation("/register")}
         >
@@ -84,7 +84,7 @@ const Home = () => {
           <h3>Not Registered Yet?</h3>
           <p>Register Now</p>
           <div className="action-arrow">→</div>
-        </div>
+        </div> */}
 
        {/*  <div
           className="action-card glass-card scale-in"
